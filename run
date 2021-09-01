@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PV='pv -i 0.1'
+
+if ! command -v pv &> /dev/null
+then
+    echo "[WARN] The pv command was not found, you will not get progress bars."
+    PV=cat
+fi
+
+echo 'GENERATING DATA FILE'
+cargo run --release --bin write-file -- $* | pv > data.jsonl
+
+
+echo
+echo
+echo 'RUST'
+$PV data.jsonl | cargo run --release --bin read-file
+
+echo
+echo
+echo 'PYTHON'
+$PV data.jsonl | python3 read-file.py
